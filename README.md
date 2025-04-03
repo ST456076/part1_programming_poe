@@ -4,7 +4,7 @@
 
 # project details
 - project name: part1_programming_poe
-- natefame:4.7.2
+- nateframe:4.7.2
 - templete: console App (.Net framework)
 
 # Main class 
