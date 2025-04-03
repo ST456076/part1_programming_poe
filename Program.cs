@@ -14,12 +14,13 @@ using System.Configuration;
 //this code will initialize the project
 namespace part1_programming_poe
 {
-    internal class Program
+    public class Program
     {
 
         static void Main(string[] args)
         {
-            
+            //createating an instance for voice massage class
+            new voice_massage() { };
 
             
 
