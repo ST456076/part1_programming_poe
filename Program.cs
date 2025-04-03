@@ -35,7 +35,8 @@ namespace part1_programming_poe
             //changing the color 
             Console.ForegroundColor = ConsoleColor.DarkMagenta;
             Console.WriteLine("=======================================================================================");
-           
+            //Create filter and split class for user questions
+            new filter_questions() { };
 
             Console.ForegroundColor = ConsoleColor.White;
         }
