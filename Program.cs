@@ -21,6 +21,7 @@ namespace part1_programming_poe
         {
             //createating an instance for voice massage class
             new voice_massage() { };
+            new logo_image() { };
 
             
 
