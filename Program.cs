@@ -22,7 +22,7 @@ namespace part1_programming_poe
             new voice_massage() { };
             new logo_image() { };
 
-            
+
 
             //setting the color to br white 
             Console.ForegroundColor = ConsoleColor.DarkMagenta;
@@ -38,10 +38,20 @@ namespace part1_programming_poe
             new filter_questions() { };
 
             Console.ForegroundColor = ConsoleColor.White;
+
+            // Ask for user input before calling rendomization
+            Console.Write("Ask your cybersecurity-related question: ");
+            string userInput = Console.ReadLine();
+
+            if (!string.IsNullOrEmpty(userInput))
+            {
+                new rendomization(userInput); // Pass user input into the constructor
+            }
+            else
+            {
+                Console.WriteLine("Please enter a valid question.");
+            }
         }
-
-
     }
 }
-
 
