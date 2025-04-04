@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using static System.Net.Mime.MediaTypeNames;
 using System.Configuration;
 //this code will initialize the project
