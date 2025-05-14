@@ -35,23 +35,24 @@ namespace part1_programming_poe
             Console.ForegroundColor = ConsoleColor.DarkMagenta;
             Console.WriteLine("=======================================================================================");
             //Create filter and split class for user questions
+            
             new filter_questions() { };
+            string userInput = Console.ReadLine();
+            new random_response(userInput);
+            // Ensure tip-related questions go to Rendom_response
+
+           
+            new memory_history(userInput) { };
+            // Ask user for input
+
+
 
             Console.ForegroundColor = ConsoleColor.White;
 
             // Ask for user input before calling rendomization
             Console.Write("Ask your cybersecurity-related question: ");
-            string userInput = Console.ReadLine();
 
-            if (!string.IsNullOrEmpty(userInput))
-            {
-                new rendomization(userInput); // Pass user input into the constructor
-            }
-            else
-            {
-                Console.WriteLine("Please enter a valid question.");
-            }
         }
     }
 }
-
+           

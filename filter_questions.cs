@@ -1,85 +1,145 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace part1_programming_poe
 {
     public class filter_questions
     {
-        // Declaring variables using ArrayList
-        ArrayList answers = new ArrayList();
-        ArrayList ignore = new ArrayList();
+        // Data structures
+        private List<string> answers = new List<string>();
+        private List<string> ignore = new List<string>();
+        private Dictionary<string, List<string>> keyword_answers = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> extraTips;
+        private Random random = new Random();
+        private string userName;
+
+        // Delegate
+        public delegate string user_name();
 
         // Constructor
         public filter_questions()
         {
-            // Initialize methods
+            // Load tips
+            random_response tips = new random_response("tips");
+            extraTips = tips.Tips;
+
+            // Load other data
+            store_keywords();
             store_answers();
             store_ignore();
+           
 
-            // Prompt user for their name
+            // Lambda for user name
+            user_name getUserName = () =>
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("AIBot>> I'm X.O the bot. Before we start, please enter your name:");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("user>: ");
+                return Console.ReadLine();
+            };
+
+            userName = getUserName();
+
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("AIBot>> Before we start, please enter your name: ");
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.Write("user>: ");
-            string userName = Console.ReadLine();
-
-            // Welcome message
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(userName + " " + " welcome! I will be your bot!");
+            Console.WriteLine($"{userName}, that's such a nice name! Welcome! I will be your bot!");
             Console.ForegroundColor = ConsoleColor.DarkMagenta;
             Console.WriteLine("-------------------------------------------------------------------------------------");
 
-            // Continuously interact with the user
+            string interaction = "how can I help you today? type 'exit' to quit";
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("Bot>> How may I assist you today? (Type 'exit' to quit)");
+                Console.WriteLine($"AIBot>> {interaction}");
                 Console.ForegroundColor = ConsoleColor.Green;
 
                 Console.Write(userName + " >: ");
                 string question = Console.ReadLine();
 
-                // Exit condition i the user has nothing to input
                 if (question.Equals("exit", StringComparison.OrdinalIgnoreCase))
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("AIBot>> Goodbye! Stay safe from cyber attecks !");
+                    Console.WriteLine("AIBot>> Goodbye! Stay safe from cyber attacks!");
                     break;
                 }
 
-                // Process the question
                 ProcessQuestion(question);
+                interaction = "Is there anything else you'd like to know about cybersecurity? (type 'exit' to quit)";
             }
         }
 
         private void ProcessQuestion(string question)
         {
-            // Split and filter user input
-            string[] store_word = question.ToLower().Split(' ');
-            ArrayList store_final_word = new ArrayList();
+            // Detect sentiment
 
-            foreach (string word in store_word)
+            // Detect sentiment
+            string sentiment = DetectSentiment(question);
+
+            // Response based on sentiment
+            if (sentiment == "negative")
             {
-                // Remove character like '?'
-                //this will help me i ask a qustion and uses  a quesstion mark 
-                string charecters = word.Trim(new char[] { '?' });
-                if (!ignore.Contains(charecters))
+                // If sentiment is negative, show an encouraging message
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"AIBot>> {GetEncouragingMessage()}");
+            }
+            else if (sentiment == "positive")
+            {
+                // If sentiment is positive, show a compliment or encouragement
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"AIBot>> That's awesome to hear! Keep up the great attitude!");
+            }
+
+            string[] words = question.ToLower().Split(' ');
+            ArrayList filteredWords = new ArrayList();
+
+            foreach (string word in words)
+            {
+                string cleaned = word.Trim(new char[] { '?', '.', ',' });
+                if (!ignore.Contains(cleaned))
                 {
-                    store_final_word.Add(charecters);
+                    filteredWords.Add(cleaned);
                 }
             }
 
-            // Find the best matching answer
-            string resp = null;
-            int firstMatches = 0;
+            // Handle tips
+            foreach (string word in filteredWords)
+            {
+                if (question.ToLower().Contains("tip") && extraTips.ContainsKey(word))
+                {
+                    List<string> tipsList = extraTips[word];
+                    if (tipsList.Count > 0)
+                    {
+                        int index = random.Next(tipsList.Count);
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"AIBot>> Here's a tip on {word}:");
+                        Console.WriteLine($"AIBot>> {tipsList[index]}");
+                        return;
+                    }
+                }
+            }
+
+            // Keyword-based response
+            foreach (string word in filteredWords)
+            {
+                if (keyword_answers.ContainsKey(word))
+                {
+                    List<string> responses = keyword_answers[word];
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("AIBot>> " + responses[0]);
+                    AskFollowUp(word);
+                    return;
+                }
+            }
+
+            // Fallback to best match
+            string bestResponse = null;
+            int bestMatchCount = 0;
 
             foreach (string answer in answers)
             {
                 int matchCount = 0;
-                foreach (string word in store_final_word)
+                foreach (string word in filteredWords)
                 {
                     if (answer.ToLower().Contains(word))
                     {
@@ -87,18 +147,17 @@ namespace part1_programming_poe
                     }
                 }
 
-                if (matchCount > firstMatches)
+                if (matchCount > bestMatchCount)
                 {
-                    firstMatches = matchCount;
-                    resp = answer;
+                    bestMatchCount = matchCount;
+                    bestResponse = answer;
                 }
             }
 
-            // Display the best answer or default response
             Console.ForegroundColor = ConsoleColor.Cyan;
-            if (!string.IsNullOrEmpty(resp))
+            if (!string.IsNullOrEmpty(bestResponse))
             {
-                Console.WriteLine("AIBot>> " + resp);
+                Console.WriteLine("AIBot>> " + bestResponse);
             }
             else
             {
@@ -106,38 +165,137 @@ namespace part1_programming_poe
             }
         }
 
-        // Method to store predefined answers
+        
+
+        private void AskFollowUp(string keyword)
+        {
+            Dictionary<string, string> followUps = new Dictionary<string, string>
+            {
+                { "password", "Would you like to know anything more about passwords?" },
+                { "phishing", "Do you want to learn how to spot phishing scams?" },
+                { "browser", "Would you like to know more about safe browsing habits?" }
+            };
+
+            if (followUps.ContainsKey(keyword))
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"AIBot>> {followUps[keyword]} (Type 'yes' or 'no')");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"{userName} >: ");
+                string response = Console.ReadLine()?.ToLower();
+
+                if (response == "yes")
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("AIBot>> Great! Here's more information...");
+                    foreach (string answer in answers)
+                    {
+                        if (answer.ToLower().Contains(keyword))
+                        {
+                            Console.WriteLine("AIBot>> " + answer);
+                            return;
+                        }
+                    }
+                    Console.WriteLine("AIBot>> Sorry, I don't have additional information on that.");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("AIBot>> No worries! Let me know what else I can assist with.");
+                }
+            }
+        }
+
+        private void store_keywords()
+        {
+            keyword_answers.Add("cybersecurity", new List<string> {
+                "Cybersecurity is the practice of protecting computers, networks, and data from hackers, viruses, and other cyber threats."
+            });
+            keyword_answers.Add("phishing", new List<string> {
+                "Phishing is a type of social engineering attack where attackers use fake emails, texts, or websites to steal sensitive information."
+            });
+            keyword_answers.Add("password", new List<string> {
+                "A password is a secret sequence of characters used to access secure systems or data. It's like a digital key only you should know."
+            });
+            keyword_answers.Add("browser", new List<string> {
+                "A safe browser protects users from harmful websites and other online threats."
+            });
+            keyword_answers.Add("threats", new List<string> {
+                "Common threats include malware, ransomware, phishing, and viruses."
+            });
+            keyword_answers.Add("hi", new List<string> {
+                "Hi there! How can I help you today?"
+            });
+        }
+
         private void store_answers()
         {
             answers.Add("My purpose is to teach you more about cybersecurity and the risks that come with the lack of knowledge about cyber attacks and threats.");
             answers.Add("You can ask about anything related to cybersecurity awareness.");
-            answers.Add("Common Threats areas follow Viruses, malware and ransomware are some dangers in cyberspace.");
-            answers.Add("Phishing is a type of social engineering attack where attackers use fraudulent emails, text messages, or websites to trick individuals into revealing sensitive information like credit card details, often by impersonating legitimate organizations or individuals");
-            answers.Add("Password can be protected by using strong and unique passwords. Avoid using your birthday, cellphone number, or anything that a hacker can easily guess.");
-            answers.Add("I'm good! How are you, and how can I assist you today?");
-            answers.Add("Cybersecurity is the practice of protecting computers, networks, and data from hackers, viruses, and other cyber threats. It helps keep personal and business information privte from being stolen, damaged, or misused. Think of it like locking your doors and windows to keep burglars out, but for digital devices and online activities.");
-            answers.Add("To protect yourself from phishing attacks, immediately report suspicious emails and stay informed about the latest phishing scams.");
-            answers.Add("Hi how are you! how can i assist you today?");
-            answers.Add("Safe browser refers to a web browser designed with enhanced security features to protect users from potentially harmful websites, malware, and other online threat");
-
+            answers.Add("Common threats include spyware, adware, Trojans, worms, rootkits, keyloggers, and botnets.");
+            answers.Add("Phishing is a cyber attack where fake emails or websites trick people into revealing sensitive data.");
+            answers.Add("Creating strong passwords helps keep accounts secure.");
+            answers.Add("I'm good! How can I assist you today?");
+            answers.Add("To protect yourself from phishing attacks, report suspicious emails and stay informed.");
+            answers.Add("A safe browser protects users from harmful websites and cyber threats.");
         }
 
-
-        // Method to store ignored words
         private void store_ignore()
         {
-
-            ignore.Add("your");
-            ignore.Add("can");
-            ignore.Add("how");
             ignore.Add("what");
             ignore.Add("tell");
             ignore.Add("about");
             ignore.Add("are");
             ignore.Add("me");
             ignore.Add("more");
+            ignore.Add("do");
+            ignore.Add("is");
+            ignore.Add("the");
+            ignore.Add("it");
+            ignore.Add("i");
+            ignore.Add("we");
+            ignore.Add("please");
 
+
+        }
+        private string DetectSentiment(string input)
+        {
+            input = input.ToLower();
+            string[] negativeWords = { "scared", "worried", "afraid", "confused", "panic", "anxious", "frustrated", "angry", "sad", "lost" };
+            string[] positiveWords = { "great", "good", "happy", "relieved", "confident", "excited" };
+
+            foreach (string word in negativeWords)
+            {
+                if (input.Contains(word))
+                {
+                    return "negative";
+                }
+            }
+
+            foreach (string word in positiveWords)
+            {
+                if (input.Contains(word))
+                {
+                    return "positive";
+                }
+            }
+
+            return "neutral";
+        }
+
+        private string GetEncouragingMessage()
+        {
+            List<string> messages = new List<string>
+            {
+                "You're doing great by asking questions. Knowledge is power!",
+                "It's okay to feel unsure — that's why I'm here.",
+                "Asking for help is a sign of strength. You're not alone.",
+                "Cybersecurity, can seem overwhelming, but step by step, you'll understand it better."
+            };
+            return messages[random.Next(messages.Count)];
         }
     }
 }
+
+        
 
