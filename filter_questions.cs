@@ -6,7 +6,6 @@ namespace part1_programming_poe
 {
     public class filter_questions
     {
-        // Data structures
         private List<string> answers = new List<string>();
         private List<string> ignore = new List<string>();
         private Dictionary<string, List<string>> keyword_answers = new Dictionary<string, List<string>>();
@@ -14,23 +13,17 @@ namespace part1_programming_poe
         private Random random = new Random();
         private string userName;
 
-        // Delegate
         public delegate string user_name();
 
-        // Constructor
         public filter_questions()
         {
-            // Load tips
             random_response tips = new random_response("tips");
             extraTips = tips.Tips;
 
-            // Load other data
             store_keywords();
             store_answers();
             store_ignore();
-           
 
-            // Lambda for user name
             user_name getUserName = () =>
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -71,23 +64,17 @@ namespace part1_programming_poe
 
         private void ProcessQuestion(string question)
         {
-            // Detect sentiment
-
-            // Detect sentiment
+            // Sentiment analysis first
             string sentiment = DetectSentiment(question);
-
-            // Response based on sentiment
             if (sentiment == "negative")
             {
-                // If sentiment is negative, show an encouraging message
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"AIBot>> {GetEncouragingMessage()}");
+                Console.WriteLine("AIBot>> " + GetEncouragingMessage());
             }
             else if (sentiment == "positive")
             {
-                // If sentiment is positive, show a compliment or encouragement
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"AIBot>> That's awesome to hear! Keep up the great attitude!");
+                Console.WriteLine("AIBot>> I'm glad to hear you're feeling positive about this, " + userName + "!");
             }
 
             string[] words = question.ToLower().Split(' ');
@@ -164,8 +151,6 @@ namespace part1_programming_poe
                 Console.WriteLine("AIBot>> Sorry, I can only assist with cybersecurity-related questions.");
             }
         }
-
-        
 
         private void AskFollowUp(string keyword)
         {
@@ -255,9 +240,8 @@ namespace part1_programming_poe
             ignore.Add("i");
             ignore.Add("we");
             ignore.Add("please");
-
-
         }
+
         private string DetectSentiment(string input)
         {
             input = input.ToLower();
@@ -290,12 +274,9 @@ namespace part1_programming_poe
                 "You're doing great by asking questions. Knowledge is power!",
                 "It's okay to feel unsure — that's why I'm here.",
                 "Asking for help is a sign of strength. You're not alone.",
-                "Cybersecurity, can seem overwhelming, but step by step, you'll understand it better."
+                "Cybersecurity can seem overwhelming, but step by step, you'll understand it better."
             };
             return messages[random.Next(messages.Count)];
         }
     }
 }
-
-        
-

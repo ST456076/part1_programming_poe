@@ -1,4 +1,4 @@
-# poe part 1 README file
+# poe part 2 README file
 
 - this is a simple cybersecurity awareness bot that uses console interactive appplication to communicate with the user.
 
